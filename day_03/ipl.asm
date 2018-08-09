@@ -41,7 +41,7 @@ entry:
 		MOV		CH,0			; シリンダ0
 		MOV		DH,0			; ヘッド0
 		MOV		CL,2			; セクタ2
-
+readloop:
         MOV     SI,0            ; 失敗回数を数えるレジスタ
 retry:
 		MOV		AH,0x02			; AH=0x02 : ディスク読み込み
@@ -49,7 +49,7 @@ retry:
 		MOV		BX,0
 		MOV		DL,0x00			; Aドライブ
 		INT		0x13			; ディスクBIOS呼び出し
-        JNC     fin             ; エラーが起きなければfinへ
+        JNC     next            ; エラーが起きなければnextへ
         ADD     SI,1            ; SIに１を足す
         CMP     SI,5            ; SIを５と比較
         JAE     error
@@ -57,6 +57,14 @@ retry:
         MOV     DL,0x00         ; Aドライブ
         INT     0x13            ; ドライブのリセット
         JC		retry
+
+next:
+        MOV     AX,ES           ;アドレスを0x200進める
+        ADD     AX,0x0020
+        MOV     ES,AX           ; ADD ES,0x0020というふうに出来ないので
+        ADD     CL,1
+        CMP     CL,18
+        JBE     readloop        ; CL<=18 ならreadloopへ
 
 ; 読み終わったけどとりあえずやることないので寝る
 
