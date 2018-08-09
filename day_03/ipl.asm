@@ -1,6 +1,8 @@
 ; haribote-ipl
 ; TAB=4
 
+CYLS	EQU		10				; 読み込みシリンダ数
+
 		ORG		0x7c00			; このプログラムがどこに読み込まれるのか
 
 ; 以下は標準的なFAT12フォーマットフロッピーディスクのための記述
@@ -65,6 +67,14 @@ next:
         ADD     CL,1
         CMP     CL,18
         JBE     readloop        ; CL<=18 ならreadloopへ
+		MOV		CL,1
+		ADD		DH,1
+		CMP		DH,2
+		JB		readloop		; DH < 2 ならreadloopへ
+		MOV		DH,0
+		ADD		CH,1
+		CMP		CH,CYLS
+		JB		readloop
 
 ; 読み終わったけどとりあえずやることないので寝る
 
