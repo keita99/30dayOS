@@ -1,4 +1,4 @@
-; hello-os
+; haribote-ipl
 ; TAB=4
 
 		ORG		0x7c00			; このプログラムがどこに読み込まれるのか
@@ -7,7 +7,7 @@
 
 		JMP		entry
 		DB		0x90
-		DB		"HELLOIPL"		; ブートセクタの名前を自由に書いてよい（8バイト）
+		DB		"HARIBOTE"		; ブートセクタの名前を自由に書いてよい（8バイト）
 		DW		512				; 1セクタの大きさ（512にしなければいけない）
 		DB		1				; クラスタの大きさ（1セクタにしなければいけない）
 		DW		1				; FATがどこから始まるか（普通は1セクタ目からにする）
@@ -22,7 +22,7 @@
 		DD		2880			; このドライブ大きさをもう一度書く
 		DB		0,0,0x29		; よくわからないけどこの値にしておくといいらしい
 		DD		0xffffffff		; たぶんボリュームシリアル番号
-		DB		"HELLO-OS   "	; ディスクの名前（11バイト）
+		DB		"HARIBOTEOS "	; ディスクの名前（11バイト）
 		DB		"FAT12   "		; フォーマットの名前（8バイト）
 		RESB	18				; とりあえず18バイトあけておく
 
@@ -33,8 +33,38 @@ entry:
 		MOV		SS,AX
 		MOV		SP,0x7c00
 		MOV		DS,AX
-		MOV		ES,AX
 
+; ディスクを読む
+
+		MOV		AX,0x0820
+		MOV		ES,AX
+		MOV		CH,0			; シリンダ0
+		MOV		DH,0			; ヘッド0
+		MOV		CL,2			; セクタ2
+
+        MOV     SI,0            ; 失敗回数を数えるレジスタ
+retry:
+		MOV		AH,0x02			; AH=0x02 : ディスク読み込み
+		MOV		AL,1			; 1セクタ
+		MOV		BX,0
+		MOV		DL,0x00			; Aドライブ
+		INT		0x13			; ディスクBIOS呼び出し
+        JNC     fin             ; エラーが起きなければfinへ
+        ADD     SI,1            ; SIに１を足す
+        CMP     SI,5            ; SIを５と比較
+        JAE     error
+        MOV     AH,0x00
+        MOV     DL,0x00         ; Aドライブ
+        INT     0x13            ; ドライブのリセット
+        JC		retry
+
+; 読み終わったけどとりあえずやることないので寝る
+
+fin:
+		HLT						; 何かあるまでCPUを停止させる
+		JMP		fin				; 無限ループ
+
+error:
 		MOV		SI,msg
 putloop:
 		MOV		AL,[SI]
@@ -45,17 +75,12 @@ putloop:
 		MOV		BX,15			; カラーコード
 		INT		0x10			; ビデオBIOS呼び出し
 		JMP		putloop
-fin:
-		HLT						; 何かあるまでCPUを停止させる
-		JMP		fin				; 無限ループ
-
 msg:
 		DB		0x0a, 0x0a		; 改行を2つ
-		DB		"hello, world"
+		DB		"load error"
 		DB		0x0a			; 改行
 		DB		0
 
-		RESB	0x1fe-($-$$)		; 0x7dfeまでを0x00で埋める命令(nasm fix -$ to -($-$$))
+		RESB	0x1fe-($-$$)		; 0x7dfeまでを0x00で埋める命令
 
 		DB		0x55, 0xaa
-
