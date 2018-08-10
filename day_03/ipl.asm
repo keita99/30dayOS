@@ -76,7 +76,9 @@ next:
 		CMP		CH,CYLS
 		JB		readloop
 
-		JMP		0xc200
+;		MOV		[0x0ff0],CH
+
+		JMP		0xc200			; プログラム読み込み
 
 ; 読み終わったけどとりあえずやることないので寝る
 
