@@ -76,6 +76,8 @@ next:
 		CMP		CH,CYLS
 		JB		readloop
 
+		JMP		0xc200
+
 ; 読み終わったけどとりあえずやることないので寝る
 
 fin:
