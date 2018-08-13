@@ -1,0 +1,7 @@
+     1                                  ; naskfunc
+     2                                  
+     3                                      GLOBAL  _io_hlt     ; 関数名
+     4                                  
+     5                                  _io_hlt:    ; void _io_hlt
+     6 00000000 F4                          HLT
+     7 00000001 C3                          RET
