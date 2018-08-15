@@ -5,13 +5,13 @@ void HariMain(void)
 {
     int i;
 
-    for ( i = 0xa000; i <= 0xaffff; i++ ) {
+    for ( i = 0xa0000; i <= 0xaffff; i++ ) {
         p = (char *)i;
         *p = i & 0x0f;
     }
 
 
-    for( ; ; ) {
+    for (;;) {
         _io_hlt();
     }
     
