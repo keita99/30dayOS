@@ -17,13 +17,13 @@ haribote.sys: asmhead.o bootpack.hrb Makefile
 	cat asmhead.o bootpack.hrb > haribote.sys
 
 haribote.img: ipl10.o haribote.sys Makefile
-#	mformat -f 1440 -C -B ipl10.o -i haribote.img ::
-#	mcopy haribote.sys -i haribote.img ::
+	mformat -f 1440 -C -B ipl10.o -i haribote.img ::
+	mcopy haribote.sys -i haribote.img ::
 
-	echo haribote.sys > haribote.name
-	dd if=ipl10.o		of=haribote.img count=2880 bs=512 conv=notrunc
-	dd if=haribote.name	of=haribote.img count=1 bs=512 seek=19 conv=notrunc
-	dd if=haribote.sys	of=haribote.img count=1 bs=512 seek=33 conv=notrunc
+#	echo haribote.sys > haribote.name
+#	dd if=ipl10.o		of=haribote.img count=2880 bs=512 conv=notrunc
+#	dd if=haribote.name	of=haribote.img count=1 bs=512 seek=19 conv=notrunc
+#	dd if=haribote.sys	of=haribote.img count=1 bs=512 seek=33 conv=notrunc
 
 img:
 	make -r haribote.img
