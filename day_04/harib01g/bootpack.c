@@ -35,9 +35,9 @@ void HariMain(void)
 
     p = (char *) 0xa0000;
 
-    boxfill8(p, 320, COL8_FF0000, 100, 50, 150,100);
+    boxfill8(p, 320, COL8_FF0000, 10, 50, 200,180);
     boxfill8(p, 320, COL8_FF00FF, 60, 20, 150,120);
-    boxfill8(p, 320, COL8_848400, 50, 20, 100,700);
+    boxfill8(p, 320, COL8_848400, 50, 20, 100,70);
 
     for (;;) {
         io_hlt();
