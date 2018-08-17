@@ -10,8 +10,12 @@ asmhead.o: asmhead.asm Makefile
 naskfunc.o: naskfunc.asm Makefile
 	nasm -g -f elf naskfunc.asm -o naskfunc.o -l naskfunc.lst
 
-hankaku.c: hankaku.txt	#hankaku.txtをhankaku.cに変換
-	hankaku2c
+hankaku2c: hankaku2c.c #hankaku.txtをC言語形式に変換するツールのコンパイル
+	gcc hankaku2c.c -o hankaku2c
+	chmod 755 hankaku2c
+
+hankaku.c: hankaku.txt hankaku2c	#hankaku.txtをhankaku.cに変換
+	./hankaku2c
 
 bootpack.hrb: bootpack.c naskfunc.o hankaku.c har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
 	gcc -march=i486 -m32 -nostdlib -T har.ld bootpack.c naskfunc.o hankaku.c -o bootpack.hrb
