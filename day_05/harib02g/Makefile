@@ -18,7 +18,7 @@ hankaku.c: hankaku.txt hankaku2c	#hankaku.txtをhankaku.cに変換
 	./hankaku2c
 
 bootpack.hrb: bootpack.c naskfunc.o hankaku.c mysprintf.c har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
-	gcc -march=i486 -m32 -nostdlib -T har.ld bootpack.c naskfunc.o hankaku.c mysprintf.c -o bootpack.hrb
+	gcc -march=i486 -m32 -nostdlib -fno-builtin -T har.ld bootpack.c naskfunc.o hankaku.c mysprintf.c -o bootpack.hrb
 
 haribote.sys: asmhead.o bootpack.hrb Makefile
 	cat asmhead.o bootpack.hrb > haribote.sys
