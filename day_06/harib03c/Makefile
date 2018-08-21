@@ -1,3 +1,5 @@
+OBJS = bootpack.c naskfunc.o hankaku.c mysprintf.c dsctbl.c graphic.c
+
 CC = gcc
 INCLUDE = .
 CFLAGS = -march=i486 -m32 -nostdlib -fno-builtin 
@@ -25,8 +27,8 @@ hankaku2c: hankaku2c.c #hankaku.txtをC言語形式に変換するツールの�
 hankaku.c: hankaku.txt hankaku2c	#hankaku.txtをhankaku.cに変換
 	./hankaku2c
 
-bootpack.hrb: bootpack.c naskfunc.o hankaku.c mysprintf.c har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
-	$(CC) -I$(INCLUDE) $(CFLAGS) -T har.ld bootpack.c naskfunc.o hankaku.c mysprintf.c -o bootpack.hrb
+bootpack.hrb: $(OBJS) har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
+	$(CC) -I$(INCLUDE) $(CFLAGS) -T har.ld $(OBJS) -o bootpack.hrb
 
 haribote.sys: asmhead.o bootpack.hrb Makefile
 	cat asmhead.o bootpack.hrb > haribote.sys
