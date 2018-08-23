@@ -10,6 +10,7 @@ struct BOOTINFO {
 extern void io_hlt(void);  /*他のファイルにこの名前の関数があるよと宣言*/
 extern void io_cli(void);
 extern void io_sti(void);
+extern void io_stihlt(void);
 extern void io_out8(int port, int data);
 extern int io_in8(int port);
 extern int io_load_eflags(void);
@@ -83,6 +84,10 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 
 
 /* int.c */
+struct KEYBUF {
+	unsigned char data, flag;
+};
+
 void init_pic(void);
 void inthandler21(int *esp);
 void inthandler27(int *esp);
