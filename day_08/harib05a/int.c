@@ -39,19 +39,24 @@ void inthandler21(int *esp)
 	return;
 }
 
+struct FIFO8 mousefifo;
+
 void inthandler2c(int *esp)
-/* PS/2キーボードからの割り込み */
+/* PS/2マウスからの割り込み */
 {
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 -1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "INT 2c(IRQ-12) PS/2 mouse");
-	for (;;) {
-		io_hlt();	
-	}	
+	unsigned char data;
+
+	io_out8(PIC1_OCW2, 0x64); /*IRQ-12受付完了をPICに通知 */
+	io_out8(PIC0_OCW2, 0x62); /*IRQ-02受付完了をPICに通知 */
+	data = io_in8(PORT_KEYDAT);
+
+	fifo8_put(&mousefifo, data);
+	return;
 }
 
 void inthandler27(int *esp)
-{
+/* プリンターからの割り込み */
+{	
 	io_out8(PIC0_OCW2, 0x67);
 	return;	
 }

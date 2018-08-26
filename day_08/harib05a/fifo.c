@@ -2,8 +2,6 @@
 
 #define FLAGS_OVERRUN   0x0001
 
-struct FIFO8 fifo;
-
 void fifo8_init(struct FIFO8 *fifo, int size, unsigned char *buf)
 {
     fifo->size = size;
@@ -12,6 +10,7 @@ void fifo8_init(struct FIFO8 *fifo, int size, unsigned char *buf)
     fifo->flags = 0;
     fifo->p = 0; /* 書き込み位置 */
     fifo->q = 0; /* 読み込み位置 */
+    return;
 }
 
 int fifo8_put(struct FIFO8 *fifo, unsigned data)
@@ -48,5 +47,5 @@ int fifo8_get(struct FIFO8 *fifo)
 
 int fifo8_status(struct FIFO8 *fifo)
 {
-    return fifo->size -fifo->free;
+    return fifo->size - fifo->free;
 }
