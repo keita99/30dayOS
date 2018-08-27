@@ -1,4 +1,4 @@
-OBJS = bootpack.c naskfunc.o hankaku.c mysprintf.c dsctbl.c graphic.c int.c fifo.c
+OBJS_BOOTPACK = bootpack.c naskfunc.o hankaku.c mysprintf.c dsctbl.c graphic.c int.c fifo.c mouse.c keyboard.c
 
 CC = gcc
 INCLUDE = .
@@ -27,8 +27,8 @@ hankaku2c: hankaku2c.c #hankaku.txtをC言語形式に変換するツールの�
 hankaku.c: hankaku.txt hankaku2c	#hankaku.txtをhankaku.cに変換
 	./hankaku2c
 
-bootpack.hrb: $(OBJS) har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
-	$(CC) -I$(INCLUDE) $(CFLAGS) -T har.ld $(OBJS) -o bootpack.hrb
+bootpack.hrb: $(OBJS_BOOTPACK) har.ld Makefile       # Cファイルをリンカスクリプトを用いてコンパイル
+	$(CC) -I$(INCLUDE) $(CFLAGS) -T har.ld $(OBJS_BOOTPACK) -o bootpack.hrb
 
 haribote.sys: asmhead.o bootpack.hrb Makefile
 	cat asmhead.o bootpack.hrb > haribote.sys
