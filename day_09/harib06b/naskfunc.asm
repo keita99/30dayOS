@@ -9,6 +9,7 @@
     GLOBAL  load_gdtr, load_idtr
     GLOBAL  asm_inthandler21, asm_inthandler27, asm_inthandler2c
     EXTERN  inthandler21, inthandler27, inthandler2c
+    GLOBAL  load_cr0, store_cr0
 
 [SECTION .text]
 
@@ -134,3 +135,12 @@ asm_inthandler2c:
     POP     DS
     POP     ES
     IRETD    
+
+load_cr0:   ;int load_cr0(void);
+    MOV     EAX,CR0
+    RET
+
+store_cr0:   ;void store(int cr0);
+    MOV     EAX,[ESP+4]
+    MOV     CR0,EAX
+    RET
