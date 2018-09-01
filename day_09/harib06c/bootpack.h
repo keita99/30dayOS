@@ -22,6 +22,7 @@ extern void asm_inthandler27(void);
 extern void asm_inthandler2c(void);
 extern int load_cr0(void);
 extern void store_cr0(int cr0);
+extern int memtest_sub(int start, int end);
 
 
 /* mysprintf.c */
