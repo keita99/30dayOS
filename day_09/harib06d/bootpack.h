@@ -139,6 +139,7 @@ int fifo8_status(struct FIFO8 *fifo);
 
 /* memory.c */
 #define MEMMAN_FREES    4090 /* 約32KB */
+#define MEMMAN_ADDR     0x003c0000
 
 struct FREEINFO {
     unsigned int addr,size;
