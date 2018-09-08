@@ -1,4 +1,4 @@
-OBJS_BOOTPACK = bootpack.c naskfunc.o hankaku.c mysprintf.c dsctbl.c graphic.c int.c fifo.c mouse.c keyboard.c memory.c
+OBJS_BOOTPACK = bootpack.c naskfunc.o hankaku.c mysprintf.c dsctbl.c graphic.c int.c fifo.c mouse.c keyboard.c memory.c sheet.c
 
 CC = gcc
 INCLUDE = .

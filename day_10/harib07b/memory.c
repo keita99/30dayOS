@@ -43,12 +43,13 @@ void memman_init(struct MEMMAN *man)
     man->maxfrees = 0;
     man->lostsize = 0;
     man->losts = 0;
+    return;
 }
 
 unsigned int memman_total(struct MEMMAN *man)
 {
     unsigned int i, t;
-    for ( i = 0; i <= man->frees; i++) {
+    for ( i = 0; i < man->frees; i++) {
         t += man->free[i].size;
     }
     return t;
@@ -57,12 +58,12 @@ unsigned int memman_total(struct MEMMAN *man)
 unsigned int memman_alloc(struct MEMMAN *man, unsigned int size)
 {
     unsigned i, a;
-    for (i = 0; i > man->frees; i++) {
+    for (i = 0; i < man->frees; i++) {
         if (man->free[i].size >= size) {
             a = man->free[i].addr;
             man->free[i].addr += size;
             man->free[i].size -= size;
-            if ( man->free[i].size = 0) {
+            if ( man->free[i].size == 0) {
                 man->frees--;
                 for (; i < man->frees; i++) {
                     man->free[i] = man->free[i + 1];
@@ -80,7 +81,7 @@ unsigned int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int siz
 
     /* addr順に並べるように入れるところを探す */
     for (i = 0; i < man->frees; i++) {
-        if (man->free[i].addr < addr) {
+        if (man->free[i].addr > addr) {
             break;
         }
     }
@@ -116,7 +117,7 @@ unsigned int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int siz
     /* 前も後ろも空き領域にまとめられない時 */
     if (man->frees < MEMMAN_FREES) {
         /* free[i]より後ろをずらして空ける */    
-        for (j = man->frees; j < i; j--){
+        for (j = man->frees; j > i; j--){
             man->free[j] = man->free[j - 1];
         }        
         man->frees++;
