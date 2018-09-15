@@ -20,6 +20,7 @@ extern void load_idtr(int limit, int addr);
 extern void asm_inthandler21(void);
 extern void asm_inthandler27(void);
 extern void asm_inthandler2c(void);
+extern void asm_inthandler20(void);
 extern int load_cr0(void);
 extern void store_cr0(int cr0);
 extern int memtest_sub(int start, int end);
@@ -175,7 +176,6 @@ struct SHTCTL {
     struct SHEET sheets0[MAX_SHEETS];
 };
 
-
 struct SHTCTL *shtctl_init(struct MEMMAN *memman, unsigned char *vram, int xsize, int ysize);
 struct SHEET *sheet_alloc(struct SHTCTL *ctl);
 void sheet_setbuf(struct SHEET *sht, unsigned char *buf, int xsize, int ysize, int col_inv);
@@ -185,3 +185,8 @@ void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, in
 void sheet_refreshmap(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int h0);
 void sheet_slide(struct SHEET *sht, int vx0, int vy0);
 void sheet_free(struct SHEET *sht);
+
+
+/* timer.c */
+void init_pit(void);
+void inthandler20(int *esp);
