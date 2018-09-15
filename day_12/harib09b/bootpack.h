@@ -188,5 +188,10 @@ void sheet_free(struct SHEET *sht);
 
 
 /* timer.c */
+struct TIMERCTL {
+    unsigned int count;
+};
+extern struct TIMERCTL timerctl;
+
 void init_pit(void);
 void inthandler20(int *esp);
