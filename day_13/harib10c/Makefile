@@ -9,7 +9,7 @@ default: haribote.img
 	make haribote.img
 
 run: haribote.img
-	qemu-system-i386 -fda $^
+	qemu-system-x86_64 -usb $^
 
 ipl10.o: ipl10.asm Makefile
 	$(ASM) ipl10.asm -o ipl10.o -l ipl10.lst
