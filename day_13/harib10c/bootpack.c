@@ -86,10 +86,6 @@ void HariMain(void)
 
     for (;;) {
         count++;
-
-        sprintf(s, "%d", timerctl.count);
-        putfonts8_asc_sht(sht_win, 40, 28 ,COL8_000000, COL8_C6C6C6, s, 10);
-
         io_cli();
         if (fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo) == 0) {
             io_sti();
@@ -141,7 +137,7 @@ void HariMain(void)
                 if (i == 10) {
                     putfonts8_asc_sht(sht_back, 0, 64 ,COL8_FFFFFF, COL8_008484, "10[sec]", 7);
                     sprintf(s, "%d", count); /* 起動してから3秒後からのカウンタ表示 */
-                    putfonts8_asc_sht(sht_back, 40, 28 ,COL8_000000, COL8_C6C6C6, s, 10);
+                    putfonts8_asc_sht(sht_win, 40, 28 ,COL8_000000, COL8_C6C6C6, s, 10);
                 } else if (i == 3) {
                    putfonts8_asc_sht(sht_back, 0, 80 ,COL8_FFFFFF, COL8_008484, "3[sec]", 6);
                    count = 0; /* カウンタリセットしてここから計測開始 */
