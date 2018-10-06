@@ -40,8 +40,8 @@ haribote.img: ipl10.o haribote.sys Makefile
 img:
 	make -r haribote.img
 
-debug:
-	qemu-system-i386 -fda haribote.img -gdb tcp::10000 -S
+debug: haribote.img
+	qemu-system-x86_64 -usb $^ -s -S
 
 clean:
 	rm -rf *.img *.lst *.sys *.name *.o *.hrb

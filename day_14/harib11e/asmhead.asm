@@ -12,21 +12,65 @@ VMODE	EQU		0x0ff2			; 色数に関する情報。何ビットカラーか？
 SCRNX	EQU		0x0ff4			; 解像度のX
 SCRNY	EQU		0x0ff6			; 解像度のY
 VRAM	EQU		0x0ff8			; グラフィックバッファの開始番地
+VBEMODE	EQU		0x105
 
 		ORG		0xc200			; このプログラムがどこに読み込まれるのか
 
 ; 画面モードを設定
+; VBE存在確認
+		MOV		AX,0x9000
+		MOV		ES,AX
+		MOV		DI,0
+		MOV		AX,0x4f00
+		INT		0x10
+		CMP		AX,0x004f
+		JNE		scrn320
 
-		MOV		BX,0x4101			; VGAグラフィックス、640x480x8bitカラー
+; VBEのversionチェック
+		MOV		AX,[ES:DI+4]
+		CMP		AX,0x0200
+		JB		scrn320			; if(AX < 0x0200) goto scrn320
+
+; 画面情報を取得
+		MOV		CX,VBEMODE
+		MOV		AX,0x4f01
+		INT		0x10
+		CMP		AX,0x004f
+		JNE		scrn320
+
+; 画面情報の確認
+		CMP		BYTE[ES:DI+0x19],8
+		JNE		scrn320
+		CMP		BYTE[ES:DI+0x1b],4
+		JNE		scrn320
+		MOV		AX,[ES:DI+0x00]
+		AND		AX,0x0080
+		JZ		scrn320
+
+; 画面モード切替
+		MOV		BX,VBEMODE+0x4000
 		MOV		AX,0x4f02
 		INT		0x10
+		MOV		BYTE[VMODE],8
+		MOV		AX,[ES:DI+0x12]
+		MOV		[SCRNX],AX
+		MOV		AX,[ES:DI+0x14]
+		MOV		[SCRNY],AX
+		MOV		EAX,[ES:DI+0x28]
+		MOV		[VRAM],EAX
+		JMP		keystatus
+
+scrn320:
+		MOV		AL,0x13			; VGAグラフィックス、320x200x8bitカラー
+		MOV		AH,0x00
+		INT		0x10
 		MOV		BYTE [VMODE],8	; 画面モードをメモする（C言語が参照する）
-		MOV		WORD [SCRNX],640
-		MOV		WORD [SCRNY],480
-		MOV		DWORD [VRAM],0xe0000000
+		MOV		WORD [SCRNX],320
+		MOV		WORD [SCRNY],200
+		MOV		DWORD [VRAM],0x000a0000
 
 ; キーボードのLED状態をBIOSに教えてもらう
-
+keystatus:
 		MOV		AH,0x02
 		INT		0x16 			; keyboard BIOS
 		MOV		[LEDS],AL
