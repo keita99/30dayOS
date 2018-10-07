@@ -12,7 +12,7 @@ VMODE	EQU		0x0ff2			; 色数に関する情報。何ビットカラーか？
 SCRNX	EQU		0x0ff4			; 解像度のX
 SCRNY	EQU		0x0ff6			; 解像度のY
 VRAM	EQU		0x0ff8			; グラフィックバッファの開始番地
-VBEMODE	EQU		0x105
+VBEMODE	EQU		0x101			; 解像度の指定(0x101=640x480,0x103=800x600,0x105=1024x768,0x107=1280x1024)
 
 		ORG		0xc200			; このプログラムがどこに読み込まれるのか
 

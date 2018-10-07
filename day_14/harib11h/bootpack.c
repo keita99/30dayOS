@@ -27,14 +27,14 @@ void HariMain(void)
     io_sti();
 
     fifo32_init(&fifo, 128, fifobuf);
-        
+
     init_pit();
     timer = timer_alloc();
     timer2 = timer_alloc();
     timer3 = timer_alloc();
-    timer_init(timer, &fifo, 10);    
-    timer_init(timer2, &fifo, 3);    
-    timer_init(timer3, &fifo, 1);    
+    timer_init(timer, &fifo, 10);
+    timer_init(timer2, &fifo, 3);
+    timer_init(timer3, &fifo, 1);
     timer_settime(timer, 1000);
     timer_settime(timer2, 300);
     timer_settime(timer3, 50);
@@ -50,13 +50,13 @@ void HariMain(void)
     memman_free(memman, 0x00001000, 0x0009e000);
     memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
-    
+
     init_palette();
     shtctl = shtctl_init(memman,binfo->vram,binfo->scrnx, binfo->scrny);
     sht_back = sheet_alloc(shtctl);
     sht_mouse = sheet_alloc(shtctl);
     sht_win = sheet_alloc(shtctl);
-    
+
     buf_back = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
     buf_win = (unsigned char *) memman_alloc_4k(memman, 160 * 52);
 
@@ -64,9 +64,9 @@ void HariMain(void)
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
     sheet_setbuf(sht_win, buf_win, 160, 52, -1);
 
-    init_screen8(buf_back, binfo->scrnx, binfo->scrny);    
+    init_screen8(buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8(buf_mouse, 99);
-    make_window8(buf_win, 160, 68, "counter");
+    make_window8(buf_win, 160, 68, "window");
 
     sheet_slide(sht_back, 0, 0);
     mx = (binfo->scrnx - 16) / 2;
@@ -79,20 +79,22 @@ void HariMain(void)
 
     sprintf(s, "(%d, %d)", mx, my);
     putfonts8_asc_sht(sht_back, 0, 0 ,COL8_FFFFFF, COL8_008484, s, 10);
-	
+
     sprintf(s, "memory %dMB   free : %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
     putfonts8_asc_sht(sht_back, 0, 32 ,COL8_FFFFFF, COL8_008484, s, 40);
 
     for (;;) {
-        count++;
         io_cli();
         if (fifo32_status(&fifo) == 0) {
-            io_sti();
+            io_stihlt();
         } else {
-            i = fifo32_get(&fifo);    
+            i = fifo32_get(&fifo);
             if (256 <= i && i <= 511) {
                 sprintf(s, "%x", i - 256);
                 putfonts8_asc_sht(sht_back, 0, 16 ,COL8_FFFFFF, COL8_008484, s, 2);
+                if (i == 0x1e + 256) {
+                    putfonts8_asc_sht(sht_win, 40 ,28, COL8_000000, COL8_C6C6C6, "A", 1);
+                }
             } else if (512 <= i && i <= 767) {
                 if (mouse_decode(&mdec, i - 512) != 0) {
                     sprintf(s, "[lcr %d %d]", mdec.x, mdec.y); /* xとyが４桁表示指定ができないので表示が崩れる */
@@ -122,7 +124,7 @@ void HariMain(void)
                     if (my > binfo->scrny - 1) {
                         my = binfo->scrny - 1;
                     }
-                    
+
                     sprintf(s, "(%d, %d)", mx, my);
                     putfonts8_asc_sht(sht_back, 0, 0 ,COL8_FFFFFF, COL8_008484, s, 10);
                     sheet_slide(sht_mouse, mx, my);
@@ -136,15 +138,15 @@ void HariMain(void)
                 count = 0; /* カウンタリセットしてここから計測開始 */
             } else if (i == 1 ) {
                 timer_init(timer3, &fifo, 0);
-                boxfill8(buf_back, binfo->scrnx, COL8_FFFFFF, 8, 96, 15, 111);    
+                boxfill8(buf_back, binfo->scrnx, COL8_FFFFFF, 8, 96, 15, 111);
                 timer_init(timer3, &fifo, 1);
-                boxfill8(buf_back, binfo->scrnx, COL8_008484, 8, 96, 15, 111);    
+                boxfill8(buf_back, binfo->scrnx, COL8_008484, 8, 96, 15, 111);
             } else if (i == 0 ) {
                 timer_settime(timer3, 50);
                 sheet_refresh(sht_back, 8, 96, 16, 112);
             }
-        }   
-        
+        }
+
     }
 }
 
@@ -195,7 +197,7 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
             buf[(5 + y) * xsize + (xsize - 21 + x)] = c;
         }
     }
-    return;    
+    return;
 }
 
 void putfonts8_asc_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, int l)
