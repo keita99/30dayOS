@@ -71,6 +71,8 @@ void HariMain(void)
     memman_free(memman, 0x00001000, 0x0009e000);
     memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
+
+    task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
     load_tr(3 * 8);    
     tss_a.ldtr = 0;
     tss_a.iomap = 0x40000000;
@@ -91,7 +93,6 @@ void HariMain(void)
     tss_b.ds = 1 * 8;
     tss_b.fs = 1 * 8;
     tss_b.gs = 1 * 8;
-    tss_b.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
 
 
     init_palette();
