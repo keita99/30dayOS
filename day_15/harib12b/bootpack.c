@@ -297,7 +297,6 @@ void task_b_main(void)
 
     fifo32_init(&fifo, 128, fifobuf);
 
-    init_pit();
     timer = timer_alloc();
     timer_init(timer, &fifo, 1);
     timer_settime(timer, 500);
@@ -311,7 +310,6 @@ void task_b_main(void)
             io_sti();
             if (i == 1) {
                 taskswitch3(); /* タスクAに戻る */
-
             }
         }
     }
