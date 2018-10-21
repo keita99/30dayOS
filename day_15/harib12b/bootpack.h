@@ -27,6 +27,7 @@ extern int load_cr0(void);
 extern void store_cr0(int cr0);
 extern void load_tr(int tr);
 extern void taskswitch4(void);
+extern void taskswitch3(void);
 extern int memtest_sub(int start, int end);
 
 
