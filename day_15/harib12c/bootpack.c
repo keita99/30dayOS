@@ -39,6 +39,7 @@ void HariMain(void)
     struct TSS32 tss_a, tss_b;
     struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
     int task_b_esp;
+    struct TIMER *timer_ts;
 
     init_gdtidt();
     init_pic();
@@ -59,6 +60,10 @@ void HariMain(void)
     timer_settime(timer, 1000);
     timer_settime(timer2, 300);
     timer_settime(timer3, 50);
+
+    timer_ts = timer_alloc();
+    timer_init(timer_ts, &fifo, 2);
+    timer_settime(timer_ts, 2);
 
     io_out8(PIC0_IMR, 0xf8); /* pitとpic1とキーボード許可 */
     io_out8(PIC1_IMR, 0xef); /* マウスを許可 */
@@ -139,7 +144,10 @@ void HariMain(void)
         } else {
             i = fifo32_get(&fifo);
             io_sti();
-            if (256 <= i && i <= 511) {
+            if (i == 2) {
+                farjmp(0, 4 * 8);
+                timer_settime(timer_ts, 2);
+            } else if (256 <= i && i <= 511) { /* キーボード入力 */
                 sprintf(s, "%x", i - 256);
                 putfonts8_asc_sht(sht_back, 0, 16 ,COL8_FFFFFF, COL8_008484, s, 2);
                 if (i < 256 + 0x54) {
@@ -197,7 +205,6 @@ void HariMain(void)
                 }
             } else if (i == 10) {
                 putfonts8_asc_sht(sht_back, 0, 64 ,COL8_FFFFFF, COL8_008484, "10[sec]", 7);
-                taskswitch4();
             } else if (i == 3) {
                 putfonts8_asc_sht(sht_back, 0, 80 ,COL8_FFFFFF, COL8_008484, "3[sec]", 6);
             } else if (i <= 1 ) { /* カーソル用タイマー */
@@ -293,14 +300,13 @@ void task_b_main(void)
 {
     struct FIFO32 fifo;
     int fifobuf[128], i;
-    struct TIMER *timer;
+    struct TIMER *timer_ts;
 
     fifo32_init(&fifo, 128, fifobuf);
 
-    init_pit();
-    timer = timer_alloc();
-    timer_init(timer, &fifo, 1);
-    timer_settime(timer, 500);
+    timer_ts = timer_alloc();
+    timer_init(timer_ts, &fifo, 1);
+    timer_settime(timer_ts, 2);
 
     for (;;) {
         io_cli();
@@ -310,8 +316,8 @@ void task_b_main(void)
             i = fifo32_get(&fifo);
             io_sti();
             if (i == 1) {
-                taskswitch3(); /* タスクAに戻る */
-
+                farjmp(0, 3 * 8); /* タスクAに戻る */
+                timer_settime(timer_ts, 2);
             }
         }
     }
