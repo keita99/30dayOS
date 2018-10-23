@@ -113,6 +113,8 @@ void HariMain(void)
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
     sheet_setbuf(sht_win, buf_win, 160, 52, -1);
 
+    *((int *) 0xfec) = (int) sht_back;
+
     init_screen8(buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8(buf_mouse, 99);
     make_window8(buf_win, 160, 68, "window");
@@ -299,8 +301,12 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 void task_b_main(void)
 {
     struct FIFO32 fifo;
-    int fifobuf[128], i;
+    int fifobuf[128], i, count = 0;
     struct TIMER *timer_ts;
+    char s[11];
+    struct SHEET *sht_back;
+
+    sht_back = (struct SHEET *) *((int *) 0x0fec);
 
     fifo32_init(&fifo, 128, fifobuf);
 
@@ -309,9 +315,12 @@ void task_b_main(void)
     timer_settime(timer_ts, 2);
 
     for (;;) {
+        count++;
+        sprintf(s, "%d", count);
+        putfonts8_asc_sht(sht_back, 0, 144, COL8_FFFFFF, COL8_008484, s, 10);
         io_cli();
         if (fifo32_status(&fifo) == 0) {
-            io_stihlt();
+            io_sti();
         } else {
             i = fifo32_get(&fifo);
             io_sti();
