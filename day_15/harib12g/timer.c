@@ -26,7 +26,7 @@ void init_pit(void)
     t->next = 0;/* 最後 */
     timerctl.t0 = t;/* でも先頭 */
     timerctl.next = 0xffffffff;
-    return;    
+    return;
 }
 
 struct TIMER *timer_alloc(void)
@@ -35,8 +35,8 @@ struct TIMER *timer_alloc(void)
     for (i = 0; i < MAX_TIMER; i++) {
         if (timerctl.timers0[i].flags == 0) {
             timerctl.timers0[i].flags = TIMER_FLAGS_ALLOC;
-            return &timerctl.timers0[i];        
-        }    
+            return &timerctl.timers0[i];
+        }
     }
     return 0; /* 空きが見つからなかった */
 }
@@ -56,6 +56,8 @@ void timer_init(struct TIMER *timer, struct FIFO32 *fifo, int data)
 void inthandler20(int *esp)
 {
     struct TIMER *timer;
+    char ts = 0;
+
     io_out8(PIC0_OCW2, 0x60);
 
     timerctl.count++;
@@ -64,21 +66,29 @@ void inthandler20(int *esp)
         return;
     }
 
-    timer = timerctl.t0;    
+    timer = timerctl.t0;
 
     for (;;) {
         if (timer->timeout > timerctl.count) {
             break;
         }
-        /* タイムアウト時 */        
-        timer->flags = TIMER_FLAGS_ALLOC;    
-        fifo32_put(timer->fifo, timer->data);
+        /* タイムアウト時 */
+        timer->flags = TIMER_FLAGS_ALLOC;
+        if (timer != mt_timer) {
+            fifo32_put(timer->fifo, timer->data);
+        } else {
+            ts = 1; /* mt_timeがタイムアウトした */
+        }
         timer = timer->next;
     }
 
     timerctl.t0 = timer;
 
-    timerctl.next = timerctl.t0->timeout;
+    timerctl.next = timer->timeout;
+
+    if (ts != 0) {
+        mt_taskswitch();
+    }
 
     return;
 }
@@ -102,7 +112,7 @@ void timer_settime(struct TIMER *timer, unsigned int timeout)
         return;
     }
 
-    /* どこに入れるか探す */    
+    /* どこに入れるか探す */
     for (;;) {
         s = t;
         t = t->next;

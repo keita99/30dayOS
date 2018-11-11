@@ -219,3 +219,9 @@ struct TIMER *timer_alloc(void);
 void timer_free(struct TIMER *timer);
 void inthandler20(int *esp);
 void timer_settime(struct TIMER *timer, unsigned int timeout);
+
+/* mtask.c */
+extern struct TIMER *mt_timer;
+
+void mt_init(void);
+void mt_taskswitch(void);
