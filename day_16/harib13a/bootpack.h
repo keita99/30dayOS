@@ -91,14 +91,6 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 #define AR_INTGATE32    0x008e
 #define AR_TSS32        0x0089
 
-/* タスク状態セグメント */
-struct TSS32 {
-    int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
-    int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
-    int es, cs, ss, ds, fs, gs;
-    int ldtr, iomap;
-};
-
 
 /* int.c */
 void init_pic(void);
@@ -221,7 +213,32 @@ void inthandler20(int *esp);
 void timer_settime(struct TIMER *timer, unsigned int timeout);
 
 /* mtask.c */
+/* タスク状態セグメント */
+#define MAX_TASKS   1000 /* 最大タスク数 */
+#define TASK_GDT0   3    /* TSSをGDTの何番から割り当てるか */
+extern struct TIMER *task_timer;
+
+struct TSS32 {
+    int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
+    int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
+    int es, cs, ss, ds, fs, gs;
+    int ldtr, iomap;
+};
+
+struct TASK {
+    int sel, flags; /* selはGDTの番号 */
+    struct TSS32 tss;
+};
+
+struct TASKCTL {
+    int running; /* 動作しているタスクの数 */
+    int now;/* 現在動作しているタスクがどれだかわかるようにする変数 */
+    struct TASK *task[MAX_TASKS];
+    struct TASK tasks0[MAX_TASKS];
+};
 extern struct TIMER *mt_timer;
 
-void mt_init(void);
-void mt_taskswitch(void);
+struct TASK *task_init(struct MEMMAN *memman);
+struct TASK *task_alloc(void);
+void task_run(struct TASK *task);
+void task_switch(void);

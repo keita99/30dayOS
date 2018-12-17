@@ -34,17 +34,12 @@ void HariMain(void)
 		0,   0,   0,   0,   0,   0,   0,   '7', '8', '9', '-', '4', '5', '6', '+', '1',
 		'2', '3', '0', '.'
 	};
+    struct TASK *task_b;
 
-    struct TSS32 tss_a, tss_b;
-    struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
-    int task_b_esp;
 
     init_gdtidt();
     init_pic();
     io_sti();
-
-    set_segmdesc(gdt + 3, 103, (int) &tss_a, AR_TSS32);
-    set_segmdesc(gdt + 4, 103, (int) &tss_b, AR_TSS32);
 
     fifo32_init(&fifo, 128, fifobuf);
 
@@ -71,29 +66,18 @@ void HariMain(void)
     memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
 
-    task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
-    load_tr(3 * 8);
-    tss_a.ldtr = 0;
-    tss_a.iomap = 0x40000000;
-    tss_b.ldtr = 0;
-    tss_b.iomap = 0x40000000;
-    tss_b.eip = (int) &task_b_main;
-    tss_b.eflags = 0x00000202; /* IF = 1; */
-    tss_b.eax = 0;
-    tss_b.ecx = 0;
-    tss_b.ebx = 0;
-    tss_b.esp = task_b_esp;
-    tss_b.ebp = 0;
-    tss_b.esi = 0;
-    tss_b.edi = 0;
-    tss_b.es = 1 * 8;
-    tss_b.cs = 2 * 8;
-    tss_b.ss = 1 * 8;
-    tss_b.ds = 1 * 8;
-    tss_b.fs = 1 * 8;
-    tss_b.gs = 1 * 8;
-
-    mt_init(); /* マルチタスクタイマーなど初期化 */
+    task_init(memman);
+    task_b = task_alloc();
+    task_b->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+    task_b->tss.eip = (int) &task_b_main;
+    task_b->tss.es = 1 * 8;
+    task_b->tss.cs = 2 * 8;
+    task_b->tss.ss = 1 * 8;
+    task_b->tss.ds = 1 * 8;
+    task_b->tss.fs = 1 * 8;
+    task_b->tss.gs = 1 * 8;
+    *((int *) (task_b->tss.esp + 4)) = (int) sht_back;
+    task_run(task_b);
 
     init_palette();
     shtctl = shtctl_init(memman,binfo->vram,binfo->scrnx, binfo->scrny);
@@ -107,8 +91,6 @@ void HariMain(void)
     sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1);
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
     sheet_setbuf(sht_win, buf_win, 160, 52, -1);
-
-    *((int *) (task_b_esp + 4)) = (int) sht_back;
 
     init_screen8(buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8(buf_mouse, 99);
@@ -147,7 +129,7 @@ void HariMain(void)
                 if (i < 256 + 0x54) {
                     if (keytable[i - 256] != 0 && cursor_x < 144) {
                         s[0] = keytable[i - 256];
-                        s[1] = 0;    
+                        s[1] = 0;
                         putfonts8_asc_sht(sht_win, cursor_x ,28, COL8_000000, COL8_FFFFFF, s, 1);
                         cursor_x += 8;
                     }

@@ -25,7 +25,7 @@ unsigned int memtest(unsigned int start, unsigned int end)
         store_cr0(cr0);
     }
 
-    i = memtest_sub(start, end);    
+    i = memtest_sub(start, end);
 
     if (flg486 != 0) {
         cr0 = load_cr0();
