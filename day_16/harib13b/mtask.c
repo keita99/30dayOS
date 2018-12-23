@@ -17,7 +17,7 @@ struct TASK *task_init(struct MEMMAN *memman)
     task->flags = 2; /* 動作中マーク */
     taskctl->running = 1;
     taskctl->now = 0;
-    taskctl->task[0] = task;
+    taskctl->tasks[0] = task;
     load_tr(task->sel);
     task_timer = timer_alloc();
     timer_settime(task_timer, 2);
@@ -55,7 +55,7 @@ struct TASK *task_alloc(void)
 void task_run(struct TASK *task)
 {
     task->flags =2; /*動作中フラグ*/
-    taskctl->task[taskctl->running] = task;
+    taskctl->tasks[taskctl->running] = task;
     taskctl->running++;
     return;
 }
@@ -68,7 +68,41 @@ void task_switch(void)
         if (taskctl->now == taskctl->running) {
             taskctl->now = 0;
         }
-        farjmp(0, taskctl->task[taskctl->now]->sel);
+        farjmp(0, taskctl->tasks[taskctl->now]->sel);
+    }
+    return;
+}
+
+void task_sleep(struct TASK *task)
+{
+    int i;
+    char ts = 0;
+    if (task->flags == 2) { /*指定したタスクがもし起きていたら*/
+        if (task == taskctl->tasks[taskctl->now]) {
+            ts = 1; /*自分自身を寝かせるので後でタスクスイッチする*/
+        }
+        /*taskがどこにいるか探す*/
+        for (i = 0; i < taskctl->running; i++) {
+            if (taskctl->tasks[i] == task) {
+                break;
+            }
+        }
+        taskctl->running--;
+        if (i < taskctl->now) {
+            taskctl->now--;
+        }
+        /*ずらし*/
+        for (; i < taskctl->running; i++) {
+            taskctl->tasks[i] = taskctl->tasks[i + 1];
+        }
+        task->flags = 1; /*動作していないフラグ*/
+        if ( ts != 0 ) {
+            /*タスクスイッチする*/
+            if (taskctl->now >= taskctl->running) {
+                taskctl->now = 0;
+            }
+            farjmp(0, taskctl->tasks[taskctl->now]->sel);
+        }
     }
     return;
 }
